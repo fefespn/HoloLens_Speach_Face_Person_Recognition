@@ -1,0 +1,7 @@
+
+*.ipch
+cpp/Debug/AppView.obj
+cpp/Debug/AudioFileReader.obj
+cpp/Debug/AudioStreamReader.obj
+cpp/Debug
+cpp/.vs
