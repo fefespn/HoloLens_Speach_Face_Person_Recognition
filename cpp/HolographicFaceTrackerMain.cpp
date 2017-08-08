@@ -387,6 +387,7 @@ void HolographicFaceTrackerMain::SetHolographicSpace(HolographicSpace^ holograph
 			DX::CreateAndInitializeAsync(m_quadRenderer, m_deviceResources),
 			DX::CreateAndInitializeAsync(m_spinningCubeRenderer, m_deviceResources),
 			DX::CreateAndInitializeAsync(m_textRenderer, m_deviceResources, 512u, 512u),
+			DX::CreateAndInitializeAsync(m_textRenderer_details, m_deviceResources, 512u, 512u),
 		};
 
 		if (m_videoFrameProcessor)
@@ -408,6 +409,7 @@ void HolographicFaceTrackerMain::SetHolographicSpace(HolographicSpace^ holograph
 			else
 			{
 				m_textRenderer->RenderTextOffscreen(L"No faces detected");
+				m_textRenderer_details->RenderTextOffscreen(L"No faces details ");
 			}
 
 			m_isReadyToRender = true;
@@ -698,99 +700,107 @@ HolographicFrame^ HolographicFaceTrackerMain::Update()
 
 		searching = true;
 	}
-	else {
+	else 
+	{
 		
 		//m_textRenderer_r->pre_sentence_pre = L"";
 		m_textRenderer->pre_sentence_pre = L"";
-		searching = false; }
-}
-
-
-//std::wstring fefe = L"firas";
-
-// Check for new speech input since the last frame.
-if (m_lastCommand != nullptr)
-{
-	auto command = m_lastCommand;
-	m_lastCommand = nullptr;
-	std::wstring lastCommandString = command->Data();
-	m_lastSentence = lastCommandString;
-	m_textRenderer->RenderTextOffscreen(m_textRenderer->pre_sentence_pre + L'"' +lastCommandString + L'"');
-
-}
-
-SpatialPointerPose^ pointerPose = SpatialPointerPose::TryGetAtTimestamp(currentCoordinateSystem, prediction->Timestamp);
-
-m_timer.Tick([&] {
-	m_spinningCubeRenderer->Update(m_timer);
-
-	// If we're tracking faces, then put the quad to the left side of the viewport, 2 meters out.
-	if (m_trackingFaces)
-	{
-		/*m_quadRenderer->Update(pointerPose, float3{ 0.0f, -0.15f, -2.0f }, m_timer);*/
-		m_quadRenderer->Update(pointerPose, float3{ -0.0f, 0.0f, -2.0f }, m_timer);
+		searching = false; 
 	}
-	// Otherwise, put the quad centered in the viewport, 2 meters out.
-	else
-	{
-		m_quadRenderer->ResetTexCoordScaleAndOffset();
-		/*m_quadRenderer->Update(pointerPose, float3{ 0.0f, -0.15f, -2.0f }, m_timer);*/
-		m_quadRenderer->Update(pointerPose, float3{ -0.0f, 0.0f, -2.0f }, m_timer);
-	}
-
-	// Wait to listen for speech input until the audible UI prompts are complete.
-	if ((m_waitingForSpeechPrompt == true) &&
-		((m_secondsUntilSoundIsComplete -= static_cast<float>(m_timer.GetElapsedSeconds())) <= 0.f))
-	{
-		m_waitingForSpeechPrompt = false;
-		PlayRecognitionBeginSound();
-	}
-	else if ((m_waitingForSpeechCue == true) &&
-		((m_secondsUntilSoundIsComplete -= static_cast<float>(m_timer.GetElapsedSeconds())) <= 0.f))
-	{
-		m_waitingForSpeechCue = false;
-		m_secondsUntilSoundIsComplete = 0.f;
-		StartRecognizeSpeechCommands();
 	}
 
 
-});
+	//std::wstring fefe = L"firas";
 
-// We complete the frame update by using information about our content positioning
-// to set the focus point.
-// Next, we get a coordinate system from the attached frame of reference that is
-// associated with the current frame. Later, this coordinate system is used for
-// for creating the stereo view matrices when rendering the sample content.
-
-for (auto cameraPose : prediction->CameraPoses)
-{
-	// The HolographicCameraRenderingParameters class provides access to set
-	// the image stabilization parameters.
-	HolographicCameraRenderingParameters^ renderingParameters = holographicFrame->GetRenderingParameters(cameraPose);
-
-	// If we're tracking faces, then put the focus point on the cube
-	if (m_trackingFaces)
+	// Check for new speech input since the last frame.
+	if (m_lastCommand != nullptr)
 	{
-		renderingParameters->SetFocusPoint(
-			currentCoordinateSystem,
-			m_spinningCubeRenderer->GetPosition()
-		);
+		auto command = m_lastCommand;
+		m_lastCommand = nullptr;
+		std::wstring lastCommandString = command->Data();
+		m_lastSentence = lastCommandString;
+		m_textRenderer->RenderTextOffscreen(L'"' +lastCommandString + L'"');
+		m_textRenderer_details->RenderTextOffscreen(m_textRenderer->pre_sentence_pre);
+		
 	}
-	// Otherwise put the focus point on status message quad.
-	else
-	{
-		renderingParameters->SetFocusPoint(
-			currentCoordinateSystem,
-			m_quadRenderer->GetPosition(),
-			m_quadRenderer->GetNormal(),
-			m_quadRenderer->GetVelocity()
-		);
-	}
-}
 
-// The holographic frame will be used to get up-to-date view and projection matrices and
-// to present the swap chain.
-return holographicFrame;
+	SpatialPointerPose^ pointerPose = SpatialPointerPose::TryGetAtTimestamp(currentCoordinateSystem, prediction->Timestamp);
+	SpatialPointerPose^ pointerPose_details = SpatialPointerPose::TryGetAtTimestamp(currentCoordinateSystem, prediction->Timestamp);
+
+	m_timer.Tick([&] {
+		m_spinningCubeRenderer->Update(m_timer);
+
+		// If we're tracking faces, then put the quad to the left side of the viewport, 2 meters out.
+		if (m_trackingFaces)
+		{
+			/*m_quadRenderer->Update(pointerPose, float3{ 0.0f, -0.15f, -2.0f }, m_timer);*/
+			m_quadRenderer->Update(pointerPose, float3{ -0.0f, 0.0f, -2.0f }, m_timer);
+			//m_quadRenderer_details->Update(pointerPose_details, float3{ -0.0f, 1.0f, -1.0f }, m_timer);
+		}
+		// Otherwise, put the quad centered in the viewport, 2 meters out.
+		else
+		{
+			m_quadRenderer->ResetTexCoordScaleAndOffset();
+			//m_quadRenderer_details->ResetTexCoordScaleAndOffset();
+			/*m_quadRenderer->Update(pointerPose, float3{ 0.0f, -0.15f, -2.0f }, m_timer);*/
+			m_quadRenderer->Update(pointerPose, float3{ -0.0f, 0.0f, -2.0f }, m_timer);
+		//	m_quadRenderer_details->Update(pointerPose_details, float3{ -0.0f, 1.0f, -1.0f }, m_timer);
+		}
+
+		// Wait to listen for speech input until the audible UI prompts are complete.
+		if ((m_waitingForSpeechPrompt == true) &&
+			((m_secondsUntilSoundIsComplete -= static_cast<float>(m_timer.GetElapsedSeconds())) <= 0.f))
+		{
+			m_waitingForSpeechPrompt = false;
+			PlayRecognitionBeginSound();
+		}
+		else if ((m_waitingForSpeechCue == true) &&
+			((m_secondsUntilSoundIsComplete -= static_cast<float>(m_timer.GetElapsedSeconds())) <= 0.f))
+		{
+			m_waitingForSpeechCue = false;
+			m_secondsUntilSoundIsComplete = 0.f;
+			StartRecognizeSpeechCommands();
+		}
+
+
+	});
+
+	// We complete the frame update by using information about our content positioning
+	// to set the focus point.
+	// Next, we get a coordinate system from the attached frame of reference that is
+	// associated with the current frame. Later, this coordinate system is used for
+	// for creating the stereo view matrices when rendering the sample content.
+
+	for (auto cameraPose : prediction->CameraPoses)
+	{
+		// The HolographicCameraRenderingParameters class provides access to set
+		// the image stabilization parameters.
+		HolographicCameraRenderingParameters^ renderingParameters = holographicFrame->GetRenderingParameters(cameraPose);
+
+		// If we're tracking faces, then put the focus point on the cube
+		if (m_trackingFaces)
+		{
+			renderingParameters->SetFocusPoint(
+				currentCoordinateSystem,
+				m_spinningCubeRenderer->GetPosition()
+			);
+		}
+		// Otherwise put the focus point on status message quad.
+		else
+		{
+			renderingParameters->SetFocusPoint(
+				currentCoordinateSystem,
+				m_quadRenderer->GetPosition(),
+				m_quadRenderer->GetNormal(),
+				m_quadRenderer->GetVelocity()
+			);
+			
+		}
+	}
+
+	// The holographic frame will be used to get up-to-date view and projection matrices and
+	// to present the swap chain.
+	return holographicFrame;
 }
 
 // Renders the current frame to each holographic camera, according to the
@@ -849,12 +859,14 @@ bool HolographicFaceTrackerMain::Render(Windows::Graphics::Holographic::Holograp
 				{
 					m_spinningCubeRenderer->Render();
 					// m_quadRenderer->RenderNV12(m_videoTexture->GetLuminanceTexture(), m_videoTexture->GetChrominanceTexture());
-					m_quadRenderer->RenderRGB(m_textRenderer->GetTexture());
+					m_quadRenderer->RenderRGB(m_textRenderer_details->GetTexture());
+					//m_quadRenderer_details->RenderRGB(m_textRenderer_details->GetTexture());
 				}
 				// Otherwise we render the status message on the quad.
 				else
 				{
 					m_quadRenderer->RenderRGB(m_textRenderer->GetTexture());
+					//m_quadRenderer_details->RenderRGB(m_textRenderer_details->GetTexture());
 				}
 			}
 
@@ -887,8 +899,10 @@ void HolographicFaceTrackerMain::OnDeviceLost()
 	m_isReadyToRender = false;
 
 	m_quadRenderer->ReleaseDeviceDependentResources();
+	//m_quadRenderer_details->ReleaseDeviceDependentResources();
 	m_spinningCubeRenderer->ReleaseDeviceDependentResources();
 	m_textRenderer->ReleaseDeviceDependentResources();
+	m_textRenderer_details->ReleaseDeviceDependentResources();
 	m_videoTexture->ReleaseDeviceDependentResources();
 }
 
@@ -900,6 +914,7 @@ void HolographicFaceTrackerMain::OnDeviceRestored()
 		m_quadRenderer->CreateDeviceDependentResourcesAsync(),
 		m_spinningCubeRenderer->CreateDeviceDependentResourcesAsync(),
 		m_textRenderer->CreateDeviceDependentResourcesAsync(),
+		m_textRenderer_details->CreateDeviceDependentResourcesAsync(),
 		m_videoTexture->CreateDeviceDependentResourcesAsync(),
 	};
 
