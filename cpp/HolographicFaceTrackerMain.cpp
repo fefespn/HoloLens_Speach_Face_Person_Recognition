@@ -425,8 +425,8 @@ void HolographicFaceTrackerMain::SetHolographicSpace(HolographicSpace^ holograph
 	//   occurred.
 
 	// Preload audio assets for audio cues.
-	//m_startRecognitionSound.Initialize(L"Audio//BasicListeningEarcon.wav", 0);
-	m_startRecognitionSound.Initialize(L"BasicListeningEarcon.wav", 0);
+	m_startRecognitionSound.Initialize(L"Audio//BasicListeningEarcon.wav", 0);
+	//m_startRecognitionSound.Initialize(L"BasicListeningEarcon.wav", 0);
 	m_recognitionSound.Initialize(L"BasicResultsEarcon.wav", 0);
 
 	// Begin the code sample scenario.
@@ -589,120 +589,22 @@ HolographicFrame^ HolographicFaceTrackerMain::Update()
 				if (currentTimeStamp > m_previousFrameTimestamp)
 				{
 					m_videoTexture->CopyFromVideoMediaFrame(frame->VideoMediaFrame);
-					class MyClass
-					{
-					public:
-						MyClass();
-						~MyClass();
-
-						int s = 1;
-						
-					};
+					
 
 					
 					m_previousFrameTimestamp = currentTimeStamp;
 					// 2 weeks code.
-					if (searching == false){
-					
-						// Encode the buffer back into a Base64 string.
-
-						SoftwareBitmap^ sftBitmap_c = frame->VideoMediaFrame->SoftwareBitmap;
-						SoftwareBitmap^ sftBitmap = SoftwareBitmap::Convert(sftBitmap_c, BitmapPixelFormat::Bgra8);
-						InMemoryRandomAccessStream^ mss = ref new InMemoryRandomAccessStream();
-						//SpinningCubeRenderer  m_spinningcube = *m_spinningCubeRenderer;
-						//Windows::Foundation::Numerics::float4 a = Windows::Foundation::Numerics::float4(0.0f, 1.0f, 0.0f, 0.0f);
-						//  m_spinningCubeRenderer->SetColor(a);
-						//  m_spinningcube.SetColor(a);
-						 // std::shared_ptr<TextRenderer>  m_textRenderer_r = m_textRenderer;
-						  
-						  //MyClass m_textRenderer_r;
-
-						 // auto s = make_shared<wstring>(L"Value 1");
-						 // m_textRenderer
-						 
-						  auto m_textRenderer_r = m_textRenderer;
-						create_task(BitmapEncoder::CreateAsync(BitmapEncoder::PngEncoderId, mss)
-						).then([this, sftBitmap, mss, m_pre_sentence, m_textRenderer_r](Windows::Graphics::Imaging::BitmapEncoder^ encoder) // initialize the encoder for PNG
-						{
-							encoder->SetSoftwareBitmap(sftBitmap);  // set the bitmap for the encoder
-							//encoder->FlushAsync()
-							create_task(encoder->FlushAsync()).then([this, sftBitmap, mss, m_pre_sentence, m_textRenderer_r]() // flush all the data
-							{
-								//if (bobo) {
-								IBuffer^ bufferr = ref new Buffer(mss->Size);
-								create_task(mss->ReadAsync(bufferr, mss->Size, InputStreamOptions::None)).then([this, mss, bufferr, m_pre_sentence, m_textRenderer_r](IBuffer^ bufferr2) // return the byte reader
-								{
-									String^ strBase64New_new = CryptographicBuffer::EncodeToBase64String(bufferr);
-
-									{
-
-										HttpClient^ httpClient = ref new HttpClient();
-										//Uri^ uri = ref new Uri("https://api.kairos.com/enroll");
-										Uri^ uri = ref new Uri("https://api.kairos.com/recognize");
-										httpClient->DefaultRequestHeaders->TryAppendWithoutValidation("app_id", "98a9ce6b");
-										httpClient->DefaultRequestHeaders->TryAppendWithoutValidation("app_key", "314e18bf9c959790db7be4e05e520b68");
-
-										//Platform::String^ s = "{  \"image\": \"" + strBase64New_new + "\",  \"subject_id\": \"Elizabeth\",  \"gallery_name\": \"MyGallery\"}";
-										Platform::String^ s = "{  \"image\": \"" + strBase64New_new + "\", \"gallery_name\": \"MyGallery\"}";
-										IAsyncOperationWithProgress<HttpResponseMessage^, HttpProgress> ^accessSQLOp = httpClient->PostAsync(uri, ref new HttpStringContent(s, Windows::Storage::Streams::UnicodeEncoding::Utf8, "application/json"));
-										auto operationTask = create_task(accessSQLOp);
-										operationTask.then([this, m_pre_sentence, m_textRenderer_r](HttpResponseMessage^ response) {
-
-											int a = (int)response->StatusCode;
-											if (response->StatusCode == HttpStatusCode::Ok)
-											{
-												try
-												{
-													auto asyncOperationWithProgress = response->Content->ReadAsStringAsync();
-													create_task(asyncOperationWithProgress).then([this, m_pre_sentence, m_textRenderer_r](Platform::String^ responJsonText)
-													{
-														Platform::String^  ss = (responJsonText);
-														//string &s = ss->Data;
-														std::wstring s(ss->Data());		
-														int first_index = s.find(L"subject_id");
-														if (first_index > 0) {
-															int second_index = s.find(L",", first_index + 13);
-															std::wstring name = s.substr(first_index + 13, second_index - first_index-13 - 1);
-															m_textRenderer_r->pre_sentence_pre = name+L": ";
-														}
-														else {
-															m_textRenderer_r->pre_sentence_pre = L"unknown: ";
-														}
-														//Windows::Foundation::Numerics::float4 a = Windows::Foundation::Numerics::float4(0.0f, 1.0f, 0.0f, 0.0f);
-														// m_spinningcube.SetColor(Windows::Foundation::Numerics::float4((1.0f, 1.0f, 1.0f, 1.0f)));
-														//m_textRenderer_r->RenderTextOffscreen(L"Found API");
-														//m_textRenderer_r->pre_sentence_pre = L"FOFO";
-														//*m_pre_sentence = (L"Hello:");
-														
-														
-													});
-												}
-												catch (Exception^ ex)
-												{
-												}
-											}
-										});
-
-									}
-								});
-
-
-
-							});
-						});
-						
-
-				}
+				
 			}
 		}
 
-		searching = true;
+		
 	}
 	else {
 		
-		//m_textRenderer_r->pre_sentence_pre = L"";
-		m_textRenderer->pre_sentence_pre = L"";
-		searching = false; }
+	
+	
+		 }
 }
 
 
@@ -715,7 +617,7 @@ if (m_lastCommand != nullptr)
 	m_lastCommand = nullptr;
 	std::wstring lastCommandString = command->Data();
 	m_lastSentence = lastCommandString;
-	m_textRenderer->RenderTextOffscreen(m_textRenderer->pre_sentence_pre + L'"' +lastCommandString + L'"');
+	m_textRenderer->RenderTextOffscreen(  L'"' +lastCommandString + L'"');
 
 }
 
