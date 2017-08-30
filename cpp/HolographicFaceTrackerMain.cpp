@@ -387,7 +387,6 @@ void HolographicFaceTrackerMain::SetHolographicSpace(HolographicSpace^ holograph
 			DX::CreateAndInitializeAsync(m_quadRenderer, m_deviceResources),
 			DX::CreateAndInitializeAsync(m_spinningCubeRenderer, m_deviceResources),
 			DX::CreateAndInitializeAsync(m_textRenderer, m_deviceResources, 512u, 512u),
-			DX::CreateAndInitializeAsync(m_textRenderer_details, m_deviceResources, 512u, 512u),
 		};
 
 		if (m_videoFrameProcessor)
@@ -408,8 +407,7 @@ void HolographicFaceTrackerMain::SetHolographicSpace(HolographicSpace^ holograph
 			// any faces.
 			else
 			{
-				m_textRenderer->RenderTextOffscreen(L"No faces detected");
-				m_textRenderer_details->RenderTextOffscreen(L"No faces details ");
+				m_textRenderer->RenderTextOffscreen(L"Speak");
 			}
 
 			m_isReadyToRender = true;
@@ -427,8 +425,8 @@ void HolographicFaceTrackerMain::SetHolographicSpace(HolographicSpace^ holograph
 	//   occurred.
 
 	// Preload audio assets for audio cues.
-	//m_startRecognitionSound.Initialize(L"Audio//BasicListeningEarcon.wav", 0);
-	m_startRecognitionSound.Initialize(L"BasicListeningEarcon.wav", 0);
+	m_startRecognitionSound.Initialize(L"Audio//BasicListeningEarcon.wav", 0);
+	//m_startRecognitionSound.Initialize(L"BasicListeningEarcon.wav", 0);
 	m_recognitionSound.Initialize(L"BasicResultsEarcon.wav", 0);
 
 	// Begin the code sample scenario.
@@ -591,216 +589,110 @@ HolographicFrame^ HolographicFaceTrackerMain::Update()
 				if (currentTimeStamp > m_previousFrameTimestamp)
 				{
 					m_videoTexture->CopyFromVideoMediaFrame(frame->VideoMediaFrame);
-					class MyClass
-					{
-					public:
-						MyClass();
-						~MyClass();
-
-						int s = 1;
-						
-					};
-
+					
+					//firas
 					
 					m_previousFrameTimestamp = currentTimeStamp;
 					// 2 weeks code.
-					if (searching == false){
-					
-						// Encode the buffer back into a Base64 string.
-
-						SoftwareBitmap^ sftBitmap_c = frame->VideoMediaFrame->SoftwareBitmap;
-						SoftwareBitmap^ sftBitmap = SoftwareBitmap::Convert(sftBitmap_c, BitmapPixelFormat::Bgra8);
-						InMemoryRandomAccessStream^ mss = ref new InMemoryRandomAccessStream();
-						//SpinningCubeRenderer  m_spinningcube = *m_spinningCubeRenderer;
-						//Windows::Foundation::Numerics::float4 a = Windows::Foundation::Numerics::float4(0.0f, 1.0f, 0.0f, 0.0f);
-						//  m_spinningCubeRenderer->SetColor(a);
-						//  m_spinningcube.SetColor(a);
-						 // std::shared_ptr<TextRenderer>  m_textRenderer_r = m_textRenderer;
-						  
-						  //MyClass m_textRenderer_r;
-
-						 // auto s = make_shared<wstring>(L"Value 1");
-						 // m_textRenderer
-						 
-						  auto m_textRenderer_r = m_textRenderer;
-						create_task(BitmapEncoder::CreateAsync(BitmapEncoder::PngEncoderId, mss)
-						).then([this, sftBitmap, mss, m_pre_sentence, m_textRenderer_r](Windows::Graphics::Imaging::BitmapEncoder^ encoder) // initialize the encoder for PNG
-						{
-							encoder->SetSoftwareBitmap(sftBitmap);  // set the bitmap for the encoder
-							//encoder->FlushAsync()
-							create_task(encoder->FlushAsync()).then([this, sftBitmap, mss, m_pre_sentence, m_textRenderer_r]() // flush all the data
-							{
-								//if (bobo) {
-								IBuffer^ bufferr = ref new Buffer(mss->Size);
-								create_task(mss->ReadAsync(bufferr, mss->Size, InputStreamOptions::None)).then([this, mss, bufferr, m_pre_sentence, m_textRenderer_r](IBuffer^ bufferr2) // return the byte reader
-								{
-									String^ strBase64New_new = CryptographicBuffer::EncodeToBase64String(bufferr);
-
-									{
-
-										HttpClient^ httpClient = ref new HttpClient();
-										//Uri^ uri = ref new Uri("https://api.kairos.com/enroll");
-										Uri^ uri = ref new Uri("https://api.kairos.com/recognize");
-										httpClient->DefaultRequestHeaders->TryAppendWithoutValidation("app_id", "98a9ce6b");
-										httpClient->DefaultRequestHeaders->TryAppendWithoutValidation("app_key", "314e18bf9c959790db7be4e05e520b68");
-
-										//Platform::String^ s = "{  \"image\": \"" + strBase64New_new + "\",  \"subject_id\": \"Elizabeth\",  \"gallery_name\": \"MyGallery\"}";
-										Platform::String^ s = "{  \"image\": \"" + strBase64New_new + "\", \"gallery_name\": \"MyGallery\"}";
-										IAsyncOperationWithProgress<HttpResponseMessage^, HttpProgress> ^accessSQLOp = httpClient->PostAsync(uri, ref new HttpStringContent(s, Windows::Storage::Streams::UnicodeEncoding::Utf8, "application/json"));
-										auto operationTask = create_task(accessSQLOp);
-										operationTask.then([this, m_pre_sentence, m_textRenderer_r](HttpResponseMessage^ response) {
-
-											int a = (int)response->StatusCode;
-											if (response->StatusCode == HttpStatusCode::Ok)
-											{
-												try
-												{
-													auto asyncOperationWithProgress = response->Content->ReadAsStringAsync();
-													create_task(asyncOperationWithProgress).then([this, m_pre_sentence, m_textRenderer_r](Platform::String^ responJsonText)
-													{
-														Platform::String^  ss = (responJsonText);
-														//string &s = ss->Data;
-														std::wstring s(ss->Data());		
-														int first_index = s.find(L"subject_id");
-														if (first_index > 0) {
-															int second_index = s.find(L",", first_index + 13);
-															std::wstring name = s.substr(first_index + 13, second_index - first_index-13 - 1);
-															m_textRenderer_r->pre_sentence_pre = name+L": ";
-														}
-														else {
-															m_textRenderer_r->pre_sentence_pre = L"unknown: ";
-														}
-														//Windows::Foundation::Numerics::float4 a = Windows::Foundation::Numerics::float4(0.0f, 1.0f, 0.0f, 0.0f);
-														// m_spinningcube.SetColor(Windows::Foundation::Numerics::float4((1.0f, 1.0f, 1.0f, 1.0f)));
-														//m_textRenderer_r->RenderTextOffscreen(L"Found API");
-														//m_textRenderer_r->pre_sentence_pre = L"FOFO";
-														//*m_pre_sentence = (L"Hello:");
-														
-														
-													});
-												}
-												catch (Exception^ ex)
-												{
-												}
-											}
-										});
-
-									}
-								});
-
-
-
-							});
-						});
-						
-
-				}
+				
 			}
 		}
 
-		searching = true;
-	}
-	else 
-	{
-		
-		//m_textRenderer_r->pre_sentence_pre = L"";
-		m_textRenderer->pre_sentence_pre = L"";
-		searching = false; 
-	}
-	}
-
-
-	//std::wstring fefe = L"firas";
-
-	// Check for new speech input since the last frame.
-	if (m_lastCommand != nullptr)
-	{
-		auto command = m_lastCommand;
-		m_lastCommand = nullptr;
-		std::wstring lastCommandString = command->Data();
-		m_lastSentence = lastCommandString;
-		m_textRenderer->RenderTextOffscreen(L'"' +lastCommandString + L'"');
-		m_textRenderer_details->RenderTextOffscreen(m_textRenderer->pre_sentence_pre);
 		
 	}
-
-	SpatialPointerPose^ pointerPose = SpatialPointerPose::TryGetAtTimestamp(currentCoordinateSystem, prediction->Timestamp);
-	SpatialPointerPose^ pointerPose_details = SpatialPointerPose::TryGetAtTimestamp(currentCoordinateSystem, prediction->Timestamp);
-
-	m_timer.Tick([&] {
-		m_spinningCubeRenderer->Update(m_timer);
-
-		// If we're tracking faces, then put the quad to the left side of the viewport, 2 meters out.
-		if (m_trackingFaces)
-		{
-			/*m_quadRenderer->Update(pointerPose, float3{ 0.0f, -0.15f, -2.0f }, m_timer);*/
-			m_quadRenderer->Update(pointerPose, float3{ -0.0f, 0.0f, -2.0f }, m_timer);
-			//m_quadRenderer_details->Update(pointerPose_details, float3{ -0.0f, 1.0f, -1.0f }, m_timer);
-		}
-		// Otherwise, put the quad centered in the viewport, 2 meters out.
-		else
-		{
-			m_quadRenderer->ResetTexCoordScaleAndOffset();
-			//m_quadRenderer_details->ResetTexCoordScaleAndOffset();
-			/*m_quadRenderer->Update(pointerPose, float3{ 0.0f, -0.15f, -2.0f }, m_timer);*/
-			m_quadRenderer->Update(pointerPose, float3{ -0.0f, 0.0f, -2.0f }, m_timer);
-		//	m_quadRenderer_details->Update(pointerPose_details, float3{ -0.0f, 1.0f, -1.0f }, m_timer);
-		}
-
-		// Wait to listen for speech input until the audible UI prompts are complete.
-		if ((m_waitingForSpeechPrompt == true) &&
-			((m_secondsUntilSoundIsComplete -= static_cast<float>(m_timer.GetElapsedSeconds())) <= 0.f))
-		{
-			m_waitingForSpeechPrompt = false;
-			PlayRecognitionBeginSound();
-		}
-		else if ((m_waitingForSpeechCue == true) &&
-			((m_secondsUntilSoundIsComplete -= static_cast<float>(m_timer.GetElapsedSeconds())) <= 0.f))
-		{
-			m_waitingForSpeechCue = false;
-			m_secondsUntilSoundIsComplete = 0.f;
-			StartRecognizeSpeechCommands();
-		}
+	else {
+		
+	
+	
+		 }
+}
 
 
-	});
+//std::wstring fefe = L"firas";
 
-	// We complete the frame update by using information about our content positioning
-	// to set the focus point.
-	// Next, we get a coordinate system from the attached frame of reference that is
-	// associated with the current frame. Later, this coordinate system is used for
-	// for creating the stereo view matrices when rendering the sample content.
+// Check for new speech input since the last frame.
+if (m_lastCommand != nullptr)
+{
+	auto command = m_lastCommand;
+	m_lastCommand = nullptr;
+	std::wstring lastCommandString = command->Data();
+	m_lastSentence = lastCommandString;
+	m_textRenderer->RenderTextOffscreen(  L'"' +lastCommandString + L'"');
 
-	for (auto cameraPose : prediction->CameraPoses)
+}
+
+SpatialPointerPose^ pointerPose = SpatialPointerPose::TryGetAtTimestamp(currentCoordinateSystem, prediction->Timestamp);
+
+m_timer.Tick([&] {
+	m_spinningCubeRenderer->Update(m_timer);
+
+	// If we're tracking faces, then put the quad to the left side of the viewport, 2 meters out.
+	if (m_trackingFaces)
 	{
-		// The HolographicCameraRenderingParameters class provides access to set
-		// the image stabilization parameters.
-		HolographicCameraRenderingParameters^ renderingParameters = holographicFrame->GetRenderingParameters(cameraPose);
-
-		// If we're tracking faces, then put the focus point on the cube
-		if (m_trackingFaces)
-		{
-			renderingParameters->SetFocusPoint(
-				currentCoordinateSystem,
-				m_spinningCubeRenderer->GetPosition()
-			);
-		}
-		// Otherwise put the focus point on status message quad.
-		else
-		{
-			renderingParameters->SetFocusPoint(
-				currentCoordinateSystem,
-				m_quadRenderer->GetPosition(),
-				m_quadRenderer->GetNormal(),
-				m_quadRenderer->GetVelocity()
-			);
-			
-		}
+		/*m_quadRenderer->Update(pointerPose, float3{ 0.0f, -0.15f, -2.0f }, m_timer);*/
+		m_quadRenderer->Update(pointerPose, float3{ -0.0f, 0.0f, -2.0f }, m_timer);
+	}
+	// Otherwise, put the quad centered in the viewport, 2 meters out.
+	else
+	{
+		m_quadRenderer->ResetTexCoordScaleAndOffset();
+		/*m_quadRenderer->Update(pointerPose, float3{ 0.0f, -0.15f, -2.0f }, m_timer);*/
+		m_quadRenderer->Update(pointerPose, float3{ -0.0f, 0.0f, -2.0f }, m_timer);
 	}
 
-	// The holographic frame will be used to get up-to-date view and projection matrices and
-	// to present the swap chain.
-	return holographicFrame;
+	// Wait to listen for speech input until the audible UI prompts are complete.
+	if ((m_waitingForSpeechPrompt == true) &&
+		((m_secondsUntilSoundIsComplete -= static_cast<float>(m_timer.GetElapsedSeconds())) <= 0.f))
+	{
+		m_waitingForSpeechPrompt = false;
+		PlayRecognitionBeginSound();
+	}
+	else if ((m_waitingForSpeechCue == true) &&
+		((m_secondsUntilSoundIsComplete -= static_cast<float>(m_timer.GetElapsedSeconds())) <= 0.f))
+	{
+		m_waitingForSpeechCue = false;
+		m_secondsUntilSoundIsComplete = 0.f;
+		StartRecognizeSpeechCommands();
+	}
+
+
+});
+
+// We complete the frame update by using information about our content positioning
+// to set the focus point.
+// Next, we get a coordinate system from the attached frame of reference that is
+// associated with the current frame. Later, this coordinate system is used for
+// for creating the stereo view matrices when rendering the sample content.
+
+for (auto cameraPose : prediction->CameraPoses)
+{
+	// The HolographicCameraRenderingParameters class provides access to set
+	// the image stabilization parameters.
+	HolographicCameraRenderingParameters^ renderingParameters = holographicFrame->GetRenderingParameters(cameraPose);
+
+	// If we're tracking faces, then put the focus point on the cube
+	if (m_trackingFaces)
+	{
+		renderingParameters->SetFocusPoint(
+			currentCoordinateSystem,
+			m_spinningCubeRenderer->GetPosition()
+		);
+	}
+	// Otherwise put the focus point on status message quad.
+	else
+	{
+		renderingParameters->SetFocusPoint(
+			currentCoordinateSystem,
+			m_quadRenderer->GetPosition(),
+			m_quadRenderer->GetNormal(),
+			m_quadRenderer->GetVelocity()
+		);
+	}
+}
+
+// The holographic frame will be used to get up-to-date view and projection matrices and
+// to present the swap chain.
+return holographicFrame;
 }
 
 // Renders the current frame to each holographic camera, according to the
@@ -859,14 +751,12 @@ bool HolographicFaceTrackerMain::Render(Windows::Graphics::Holographic::Holograp
 				{
 					m_spinningCubeRenderer->Render();
 					// m_quadRenderer->RenderNV12(m_videoTexture->GetLuminanceTexture(), m_videoTexture->GetChrominanceTexture());
-					m_quadRenderer->RenderRGB(m_textRenderer_details->GetTexture());
-					//m_quadRenderer_details->RenderRGB(m_textRenderer_details->GetTexture());
+					m_quadRenderer->RenderRGB(m_textRenderer->GetTexture());
 				}
 				// Otherwise we render the status message on the quad.
 				else
 				{
 					m_quadRenderer->RenderRGB(m_textRenderer->GetTexture());
-					//m_quadRenderer_details->RenderRGB(m_textRenderer_details->GetTexture());
 				}
 			}
 
@@ -899,10 +789,8 @@ void HolographicFaceTrackerMain::OnDeviceLost()
 	m_isReadyToRender = false;
 
 	m_quadRenderer->ReleaseDeviceDependentResources();
-	//m_quadRenderer_details->ReleaseDeviceDependentResources();
 	m_spinningCubeRenderer->ReleaseDeviceDependentResources();
 	m_textRenderer->ReleaseDeviceDependentResources();
-	m_textRenderer_details->ReleaseDeviceDependentResources();
 	m_videoTexture->ReleaseDeviceDependentResources();
 }
 
@@ -914,7 +802,6 @@ void HolographicFaceTrackerMain::OnDeviceRestored()
 		m_quadRenderer->CreateDeviceDependentResourcesAsync(),
 		m_spinningCubeRenderer->CreateDeviceDependentResourcesAsync(),
 		m_textRenderer->CreateDeviceDependentResourcesAsync(),
-		m_textRenderer_details->CreateDeviceDependentResourcesAsync(),
 		m_videoTexture->CreateDeviceDependentResourcesAsync(),
 	};
 
