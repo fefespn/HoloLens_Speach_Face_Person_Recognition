@@ -5,7 +5,4 @@
     <WindowsAppEmulatorID>6C3DD314-EF85-06D2-68DF-7734EA48770B;HoloLens Emulator 10.0.14393.0</WindowsAppEmulatorID>
     <DebuggerMachineName>132.68.53.234</DebuggerMachineName>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <DebuggerFlavor>WindowsDeviceDebugger</DebuggerFlavor>
-  </PropertyGroup>
 </Project>
