@@ -407,7 +407,7 @@ void HolographicFaceTrackerMain::SetHolographicSpace(HolographicSpace^ holograph
 			// any faces.
 			else
 			{
-				m_textRenderer->RenderTextOffscreen(L"No faces detected");
+				m_textRenderer->RenderTextOffscreen(L"Speak");
 			}
 
 			m_isReadyToRender = true;
@@ -590,7 +590,7 @@ HolographicFrame^ HolographicFaceTrackerMain::Update()
 				{
 					m_videoTexture->CopyFromVideoMediaFrame(frame->VideoMediaFrame);
 					
-
+					//firas
 					
 					m_previousFrameTimestamp = currentTimeStamp;
 					// 2 weeks code.
