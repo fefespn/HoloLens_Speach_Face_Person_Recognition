@@ -1,9 +1,11 @@
+
+
 <!---
   category: Holographic
   samplefwlink: http://go.microsoft.com/fwlink/p/?LinkId=824113
 --->
 
-# Holographic Deaf Assitant App
+# Holographic Deaf Assistant App
 
 An Application for assisting deaf people.
 
